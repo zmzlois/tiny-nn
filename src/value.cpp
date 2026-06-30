@@ -33,9 +33,17 @@ void Value::print() const {
   std::cout << "Value - data: " << data << ", grad: " << grad << "\n";
 }
 
-void Value::build_topology(const ValuePtr &node, std::vector<ValuePtr> &topo,
+void Value::build_topology(const ValuePtr& node, std::vector<ValuePtr>& topo,
                            std::unordered_set<Value*>& visited) {
   if (visited.find(node.get()) != visited.end()) {
     return;
+  }
+
+  visited.insert(node.get());
+
+  for (const auto &weak_child : node->previous) {
+    if (auto child = weak_child.lock()) {
+      build_topology(child, topo,visited);
+    }
   }
 }
