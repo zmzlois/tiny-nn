@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include <vector>
 
+
+
 Value::Value(double data_value, std::vector<ValuePtr> children,
              std::string operation)
     : data(data_value), grad(0.0), op(std::move(operation)),
@@ -58,6 +60,8 @@ ValuePtr value(double data) {
   return std::make_shared<Value>(data);
 }
 
+
+
 ValuePtr add(const ValuePtr &left, const ValuePtr &right) {
   auto out = std::make_shared<Value>(left->data + right->data,
                                      std::vector<ValuePtr>{left, right}, "+");
@@ -68,6 +72,38 @@ ValuePtr add(const ValuePtr &left, const ValuePtr &right) {
     if (auto out = out_weak.lock()) {
       left->grad += out->grad;
       right->grad += out->grad;
+    }
+  };
+
+  return out;
+}
+
+ValuePtr mul(const ValuePtr &left, const ValuePtr &right) {
+  auto out = std::make_shared<Value>(left->data  *right->data,
+                                     std::vector<ValuePtr>{left, right}, "*");
+
+  std::weak_ptr<Value> out_weak = out;
+
+  out->backward_fn = [left, right, out_weak]() {
+    if (auto out = out_weak.lock()) {
+      left->grad += right-> data * out->grad;
+      right->grad += right-> data * out->grad;
+    }
+  };
+
+  return out;
+
+}
+
+
+ValuePtr pow(const ValuePtr &base, double exponent) {
+  auto out = std::make_shared<Value>(std::pow(base->data, exponent), std::vector<ValuePtr>{base}, "**");
+
+  std::weak_ptr<Value> out_weak = out;
+
+  out->backward_fn = [base, exponent, out_weak]() {
+    if (auto out = out_weak.lock()) {
+      base->grad += exponent * std::pow(base->data, exponent - 1.0) * out-> grad;
     }
   };
 
