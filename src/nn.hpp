@@ -49,4 +49,20 @@ public:
 
   std::string repr() const;
 
-}
+};
+
+
+// multi-layer perceptron
+class MLP : public Module {
+
+public:
+  std::vector<Layer> layer;
+
+  MLP(int input_count, const std::vector<int> &output_counts);
+
+  std::vector<ValuePtr> forward(const std::vector<ValuePtr> &inputs) const;
+
+  std::vector<ValuePtr> parameters() const override;
+
+  std::string repr() const;
+};
