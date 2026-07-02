@@ -1,4 +1,7 @@
-#pragma once#include "value.hpp"
+#pragma once
+
+
+#include "value.hpp"
 ;
 
 #include "value.cpp"
