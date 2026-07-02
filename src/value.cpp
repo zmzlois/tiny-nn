@@ -109,3 +109,24 @@ ValuePtr pow(const ValuePtr &base, double exponent) {
 
   return out;
 }
+
+ValuePtr relu(const ValuePtr &input) {
+  auto out = std::make_shared<Value>(input->data < 0.0 ? 0.0 : input->data,
+                                     std::vector<ValuePtr>{input}, "ReLU");
+
+  std::weak_ptr<Value> out_weak = out;
+
+  out->backward_fn = [input, out_weak]() {
+    if (auto out = out_weak.lock()) {
+      input->grad += (out->data > 0.0 ? 1.0 : 0.0) * out->grad;
+    }
+  };
+
+  return out;
+};
+
+ValuePtr neg(const ValuePtr &input) { return mul(input, value(-1.0)); }
+
+ValuePtr sub(const ValuePtr &left, const ValuePtr &right) {
+  return add(left, neg(right));
+}
